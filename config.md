@@ -268,7 +268,6 @@ Then wait briefly and check again:
 timedatectl
 ```
 
+> Some network administrators do not allow NTP packets to pass through routers
 
-
-```
 
