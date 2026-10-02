@@ -1,3 +1,5 @@
+> https://www.thundercomm.com/rubik-pi-3/en/docs/notices
+
 # **Changing the Console Font Size on RUBIK Pi 3**
 
 If the RUBIK Pi 3 is connected directly to a monitor and you are using the Linux command-line interface (CLI), you can change the console font and font size using `console-setup`.
@@ -269,5 +271,6 @@ timedatectl
 ```
 
 > Some network administrators do not allow NTP packets to pass through routers
+
 
 
