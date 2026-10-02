@@ -77,7 +77,9 @@ Then repeat the configuration steps above.
 # **How to check the network**
 
 ## Check network devices
+```
 nmcli device status
+```
 
 ## Turn Wi-Fi on
 nmcli radio wifi on
