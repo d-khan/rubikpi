@@ -116,5 +116,9 @@ ping -c 4 google.com   # sometimes router blocks ICMP protocol
 nmcli connection show
 nmcli device status
 ```
+
+
+
+
 ```
 
