@@ -117,6 +117,156 @@ nmcli connection show
 nmcli device status
 ```
 
+# **Configuring Date and Time on RUBIK Pi 3**
+
+This guide explains how to check and configure the date, time, time zone, and automatic NTP synchronization on the RUBIK Pi 3 using the Linux command-line interface (CLI).
+
+## **1. Check the Current Date and Time**
+
+Run:
+
+```bash
+date
+```
+
+For more detailed information, use:
+
+```bash
+timedatectl
+```
+
+The output will show information such as:
+
+```text
+Local time: Thu 2026-10-01 18:30:00 PDT
+Universal time: Fri 2026-10-02 01:30:00 UTC
+Time zone: America/Los_Angeles (PDT, -0700)
+System clock synchronized: yes
+NTP service: active
+```
+
+## **2. Set the Time Zone**
+
+To view available time zones:
+
+```bash
+timedatectl list-timezones
+```
+
+For Pacific Time, set the time zone to:
+
+```bash
+sudo timedatectl set-timezone America/Los_Angeles
+```
+
+Verify the change:
+
+```bash
+timedatectl
+```
+
+Using `America/Los_Angeles` automatically handles the change between Pacific Standard Time (PST) and Pacific Daylight Time (PDT).
+
+## **3. Set the Date and Time Manually**
+
+If NTP is enabled, Linux may prevent you from manually changing the system time.
+
+First disable NTP:
+
+```bash
+sudo timedatectl set-ntp false
+```
+
+Set the date and time using:
+
+```bash
+sudo timedatectl set-time "YYYY-MM-DD HH:MM:SS"
+```
+
+For example:
+
+```bash
+sudo timedatectl set-time "2026-10-01 18:30:00"
+```
+
+This sets the date to **October 1, 2026** and the time to **6:30 PM**.
+
+## **4. Verify the Date and Time**
+
+Run:
+
+```bash
+date
+```
+
+You can also use:
+
+```bash
+timedatectl
+```
+
+Confirm that the local time and time zone are correct.
+
+## **5. Enable Automatic NTP Synchronization**
+
+After setting the correct date, time, and time zone, enable NTP:
+
+```bash
+sudo timedatectl set-ntp true
+```
+
+NTP allows the RUBIK Pi to synchronize its clock automatically with network time servers.
+
+## **6. Check NTP Status**
+
+Run:
+
+```bash
+timedatectl
+```
+
+Look for:
+
+```text
+System clock synchronized: yes
+NTP service: active
+```
+
+You can also check the synchronization status directly:
+
+```bash
+timedatectl show
+```
+
+Look for:
+
+```text
+NTPSynchronized=yes
+NTP=yes
+```
+
+## **7. If NTP Is Active but Not Synchronized**
+
+You may see:
+
+```text
+System clock synchronized: no
+NTP service: active
+```
+
+This means the NTP service is enabled, but the RUBIK Pi has not successfully synchronized with a time server yet.
+
+First confirm that the Internet connection is working:
+
+```bash
+ping -c 4 google.com
+```
+
+Then wait briefly and check again:
+
+```bash
+timedatectl
+```
 
 
 
