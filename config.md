@@ -73,3 +73,10 @@ sudo dpkg-reconfigure console-setup
 ```
 
 Then repeat the configuration steps above.
+
+# **How to check the network**
+
+```text
+nmcli device status
+```
+
