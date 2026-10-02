@@ -1,5 +1,178 @@
 > https://www.thundercomm.com/rubik-pi-3/en/docs/notices
 
+# **RUBIK Pi Safety Instructions**
+
+Follow these safety guidelines when setting up, operating, handling, or modifying the RUBIK Pi.
+
+------
+
+## **1. Operating Environment**
+
+### **Temperature & Humidity**
+
+- Operate the RUBIK Pi **indoors only**.
+- Recommended operating temperature: **0°C to 50°C**.
+- Relative humidity should be **85% or lower (non-condensing)**.
+- Do **not** operate the board in misty, wet, or high-humidity environments.
+
+### **Ventilation & Cooling**
+
+- Ensure that the **heat sinks and cooling fans** are functioning properly.
+- Do not block ventilation openings or restrict airflow around the board.
+- Keep sufficient space around the device for proper cooling.
+- Keep the board away from intense heat sources, including:
+  - Halogen lamps
+  - Welding sparks
+  - Lasers
+  - Other high-temperature equipment
+
+------
+
+## **2. Power Supply & Shutdown**
+
+### **Before Powering On**
+
+- Complete all required peripheral connections **before powering on** the RUBIK Pi.
+- Verify that the power supply meets the required voltage and current specifications.
+- Do not use unregulated or improperly designed DIY power supplies.
+
+### **Power Connection**
+
+- Do **not** plug or unplug the DC power connection while the board is energized.
+- Avoid frequent power cycling, as repeated abrupt power interruptions may cause hardware or file-system problems.
+
+### **Proper Shutdown Procedure**
+
+Before disconnecting power, shut down Linux properly:
+
+```bash
+sudo shutdown -h now
+```
+
+Then:
+
+1. Wait for the operating system to shut down completely.
+2. Wait for the relevant LEDs to turn off.
+3. Disconnect the power supply.
+
+**Important:** Do not simply disconnect power while Linux is running. An improper shutdown can potentially cause data or file-system corruption.
+
+------
+
+## **3. Electrostatic Discharge (ESD) Protection**
+
+Electronic components on the RUBIK Pi can be sensitive to electrostatic discharge.
+
+Before handling the **PCB, GPIO pins, FPC connectors, or other sensitive interfaces**:
+
+- Wear an **anti-static wrist strap**, or
+- Touch grounded metal to discharge static electricity before touching the board.
+
+When storing or transporting the RUBIK Pi:
+
+- Place the board inside an **anti-static bag**.
+- Avoid placing the board directly on materials that can generate static electricity.
+
+------
+
+## **4. Mechanical Mounting**
+
+- Place the RUBIK Pi on a **stable, flat, and electrically insulated surface**.
+- Use appropriate **standoffs** when permanently mounting the board.
+- Do not allow the PCB to bend or flex.
+- Always handle the board by its **edges**.
+- Avoid directly touching electronic components on the PCB.
+
+------
+
+## **5. Peripherals & Interfaces**
+
+### **USB, HDMI, MIPI CSI/DSI**
+
+USB, HDMI, MIPI CSI/DSI, and other peripherals should be connected carefully.
+
+When possible:
+
+1. Shut down the RUBIK Pi.
+2. Disconnect power.
+3. Connect or disconnect the peripheral.
+4. Reconnect power.
+5. Start the RUBIK Pi.
+
+### **Storage Devices**
+
+Before removing an SD card, UFS storage device, or other mounted storage:
+
+- Make sure the operating system is no longer using it.
+- Unmount the device properly before removal.
+
+For example:
+
+```bash
+sudo umount /path/to/mount
+```
+
+### **Cables**
+
+- Use **high-quality, well-shielded cables**.
+- Avoid unnecessarily long cables.
+- Poor-quality or excessively long cables may cause power or signal-integrity problems.
+
+### **GPIO & Expansion Modules**
+
+Before connecting hardware to GPIO pins or expansion interfaces:
+
+- Verify the required **voltage level**.
+- Verify the maximum **current rating**.
+- Confirm the correct pinout.
+- Check polarity before applying power.
+- Avoid short circuits between power, ground, and GPIO pins.
+
+**Warning:** Applying an incorrect voltage to a GPIO pin can permanently damage the RUBIK Pi.
+
+------
+
+## **6. Regulatory Compliance & Modifications**
+
+When using the RUBIK Pi with external accessories, wireless devices, power supplies, or enclosures:
+
+- Follow applicable local **electrical safety** requirements.
+- Follow applicable **EMC (Electromagnetic Compatibility)** requirements.
+- Follow applicable **RF (Radio Frequency)** regulations when wireless equipment is used.
+
+Avoid unauthorized modifications to the PCB.
+
+Do not install uncertified wireless modules or make hardware modifications that could:
+
+- Damage the board
+- Create an electrical or thermal hazard
+- Cause regulatory compliance issues
+- Affect warranty coverage
+
+------
+
+## **Safety Checklist**
+
+Before powering on the RUBIK Pi, verify:
+
+- The board is on a stable, insulated surface.
+- The correct power supply is being used.
+- All required peripherals are properly connected.
+- HDMI and other cables are securely connected.
+- Cooling and ventilation are unobstructed.
+- GPIO voltage and current requirements have been checked.
+- There are no loose conductive objects near the PCB.
+- Appropriate ESD precautions have been taken.
+
+Before disconnecting power:
+
+- Save all work.
+- Close running applications or processes as appropriate.
+- Run `sudo shutdown -h now`.
+- Wait for the system to completely shut down.
+- Disconnect the power supply.
+
+
 # **Changing the Console Font Size on RUBIK Pi 3**
 
 If the RUBIK Pi 3 is connected directly to a monitor and you are using the Linux command-line interface (CLI), you can change the console font and font size using `console-setup`.
