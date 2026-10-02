@@ -76,7 +76,29 @@ Then repeat the configuration steps above.
 
 # **How to check the network**
 
-```text
+## Check network devices
+nmcli device status
+
+## Turn Wi-Fi on
+nmcli radio wifi on
+
+## Find Wi-Fi networks
+nmcli device wifi list
+
+## Connect securely and be prompted for the password
+nmcli --ask device wifi connect "YOUR_WIFI_NAME"
+
+## Check connection
+nmcli device status
+
+## Check IP address
+hostname -I
+
+## Test Internet
+ping -c 4 google.com
+
+## Show saved connections
+nmcli connection show
 nmcli device status
 ```
 
