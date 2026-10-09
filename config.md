@@ -443,6 +443,268 @@ Then wait briefly and check again:
 timedatectl
 ```
 
+# Rubik Pi 3 ↔ Mac: USB-C Ethernet Setup
+
+**Platform:** Rubik Pi 3 running Ubuntu 24.04; macOS laptop  
+**Goal:** Direct USB-C Ethernet for SSH terminal access and two-way file transfers, without campus Ethernet or Wi-Fi.  
+**Status:** USB-C network connectivity and Mac → Rubik Pi SCP transfer tested successfully. Reverse SCP and reboot persistence should still be tested.
+
+## 1. Connection diagram
+
+```text
+                       MacBook
+                          |
+                +---------+---------+
+                |                   |
+           Micro-USB debug     USB-C data cable
+           (screen console)    (USB Ethernet)
+                |                   |
+                +---------+---------+
+                          |
+                      Rubik Pi 3
+                          |
+                    USB-C power input
+                          |
+                   12 V / 3 A PD supply
+
+ USB Ethernet addresses (independent of the Mac's Wi-Fi):
+
+       Mac: 192.168.7.1/24   <----USB-C---->   Pi: 192.168.7.2/24
+                  |                                |
+              SSH / SCP  <------------------------->
+```
+
+**Important:** Use the Rubik Pi **USB 3.1 Type-C data/device port**, not its dedicated USB-C power input. Keep external power connected. Keep the Micro-USB debug cable attached until USB-C access works reliably.
+
+## 2. Prerequisites
+
+- A USB-C cable that supports **data**, connected between the Mac and the Rubik Pi's USB 3.1 Type-C port.
+- An independent USB-C PD power supply for the Rubik Pi.
+- Initial terminal access via the Micro-USB debug port (on Mac, `screen /dev/cu.usbserial-XXXX 115200`, using the actual device name from `ls /dev/cu.*`).
+- Ubuntu 24.04 with root/sudo access.
+- `openssh-server` installed and enabled on the Rubik Pi for SSH/SCP.
+
+## 3. Check kernel support on Rubik Pi
+
+Run in the **Rubik Pi terminal**:
+
+```bash
+ls /sys/class/udc/
+# Observed: a600000.usb
+
+mount | grep configfs
+# Observed: configfs mounted on /sys/kernel/config
+
+sudo modprobe libcomposite
+sudo modprobe usb_f_ecm
+lsmod | grep -E 'usb_f_ecm|u_ether|libcomposite'
+```
+
+The tested system loaded `usb_f_ecm`, `u_ether`, and `libcomposite` successfully. After loading `libcomposite`, `/sys/kernel/config/usb_gadget/` became available.
+
+> If a gadget already exists in `/sys/kernel/config/usb_gadget/`, inspect it before making changes. The instructions below assume an empty gadget directory.
+
+## 4. Create a CDC-ECM USB Ethernet gadget
+
+Run on the **Rubik Pi**. The following example creates a gadget named `rubik`.
+
+```bash
+sudo -i
+cd /sys/kernel/config/usb_gadget
+mkdir rubik
+cd rubik
+
+# Example Linux gadget IDs for a local experiment only.
+echo 0x1d6b > idVendor
+echo 0x0104 > idProduct
+
+mkdir -p strings/0x409
+echo 'RUBIK001' > strings/0x409/serialnumber
+echo 'Qualcomm' > strings/0x409/manufacturer
+echo 'Rubik Pi 3 USB Ethernet' > strings/0x409/product
+
+mkdir -p configs/c.1/strings/0x409
+echo 'USB Ethernet' > configs/c.1/strings/0x409/configuration
+echo 250 > configs/c.1/MaxPower
+
+mkdir -p functions/ecm.usb0
+ln -s functions/ecm.usb0 configs/c.1/
+```
+
+**Note:** The sample `idVendor`/`idProduct` are for local experimentation, not assigned product IDs for distributing a fleet of devices. For production or broad deployment, use appropriately assigned USB identifiers and unique serial numbers. `MaxPower` describes USB configuration power consumption; it is **not** a replacement for the Pi's external 12 V power supply.
+
+Verify:
+
+```bash
+ls -l configs/c.1/
+ls functions/
+# Observed function: ecm.usb0
+```
+
+## 5. Bind the gadget and configure the Pi IP address
+
+Still as root in `/sys/kernel/config/usb_gadget/rubik`:
+
+```bash
+echo a600000.usb > UDC
+cat UDC
+# Expected: a600000.usb
+
+ip -br link
+# Observed: usb0 appeared
+
+ip addr add 192.168.7.2/24 dev usb0
+ip link set usb0 up
+ip -br addr show usb0
+# Observed: usb0 UP 192.168.7.2/24
+```
+
+If `ip addr add` reports `File exists`, inspect `ip addr show usb0` before repeating it. The interface can show `NO-CARRIER` until the Mac recognizes the USB device.
+
+Return from the root shell if desired:
+
+```bash
+exit
+```
+
+## 6. Configure USB Ethernet on macOS
+
+Keep your Mac's Wi-Fi connected normally. USB-C Ethernet is a **separate, private link**.
+
+**Graphical method:** Open **System Settings → Network**, select the new USB Ethernet / CDC-ECM interface, and set IPv4 manually:
+
+| Setting | Value |
+|---|---|
+| Mac USB Ethernet IP | `192.168.7.1` |
+| Subnet mask | `255.255.255.0` |
+| Router | No router needed |
+| DNS | No DNS needed |
+
+If the macOS graphical interface insists on a router value, prefer the **Terminal method** below instead of inventing a gateway.
+
+On your **Mac**, find the exact service name:
+
+```bash
+networksetup -listallnetworkservices
+```
+
+Then configure it (replace `USB Ethernet` with the actual service name):
+
+```bash
+sudo networksetup -setmanual 'USB Ethernet' 192.168.7.1 255.255.255.0
+```
+
+This configures a directly connected network **without a gateway**, preserving normal Wi-Fi internet routing.
+
+## 7. Verify the link
+
+On the **Mac**:
+
+```bash
+ping -c 4 192.168.7.2
+```
+
+Successful replies indicate the Mac can reach the Rubik Pi over USB-C Ethernet.
+
+## 8. Enable SSH and access the Pi terminal over USB-C
+
+On the **Rubik Pi**, check SSH:
+
+```bash
+sudo systemctl status ssh
+```
+
+If installed but stopped:
+
+```bash
+sudo systemctl enable --now ssh
+```
+
+If the service is not installed and internet access is available:
+
+```bash
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl enable --now ssh
+```
+
+From a **Mac Terminal**:
+
+```bash
+ssh ubuntu@192.168.7.2
+```
+
+Enter the Pi account password when prompted. To leave the SSH session, type `exit` or press **Ctrl+D**. This is different from quitting the Micro-USB `screen` session (Ctrl+A, K, Y).
+
+## 9. Transfer files in both directions
+
+Run these `scp` commands from the **Mac Terminal**, not from inside an SSH session.
+
+**Mac → Rubik Pi:**
+
+```bash
+scp ./test.cpp ubuntu@192.168.7.2:/home/ubuntu/
+```
+
+Check the result from either the Pi's Micro-USB terminal or SSH terminal:
+
+```bash
+ls -l /home/ubuntu/test.cpp
+```
+
+**Rubik Pi → Mac:**
+
+Create a sample file on the Pi:
+
+```bash
+echo 'Hello from Rubik Pi' > ~/result.txt
+```
+
+Then on the Mac:
+
+```bash
+scp ubuntu@192.168.7.2:/home/ubuntu/result.txt ~/Desktop/
+cat ~/Desktop/result.txt
+```
+
+The Mac → Pi transfer was verified during setup. Verify the reverse transfer before declaring the whole procedure tested.
+
+## 10. Important: reboot persistence is not configured yet
+
+The ConfigFS gadget and `ip` commands above are **temporary**. After a reboot, the gadget and Pi-side address may need to be recreated. Do **not** remove the Micro-USB recovery connection until automatic startup is configured and a cold-boot test passes.
+
+Recommended follow-up: implement a `systemd` oneshot service to load the gadget and assign the Pi IP at boot, ensure SSH starts automatically, and test from a fully powered-off Pi. Keep this step separate from the verified manual setup until it is tested.
+
+## 11. Troubleshooting
+
+| Symptom | Check |
+|---|---|
+| `usb_gadget` directory missing | `sudo modprobe libcomposite`; then inspect `/sys/kernel/config/` |
+| `usb0` missing | Confirm `functions/ecm.usb0`, symlink, and UDC binding |
+| No USB Ethernet interface on Mac | Confirm data-capable USB-C cable, correct data port, and gadget binding |
+| Ping fails | Check both IP addresses, subnet masks, and USB link status |
+| SSH fails but ping works | `sudo systemctl status ssh` on the Pi; check firewall and credentials |
+| SCP hangs | Check the destination: **`192.168.7.2`**, not `162.168.7.2` |
+| Configuration disappears after reboot | Expected until boot persistence is implemented |
+
+## 12. Summary
+
+```text
+                         USB-C 3.1
+  MacBook 192.168.7.1  =================  192.168.7.2 Rubik Pi 3
+        |                  CDC-ECM                 |
+        |                                          |
+        +----- SSH: terminal access --------------+
+        +----- SCP: Mac -> Pi -------------------->+
+        +<---- SCP: Pi -> Mac ---------------------+
+
+       No campus Wi-Fi, Ethernet switch, or Ethernet cable required.
+       Mac Wi-Fi internet connection can remain active independently.
+```
+
+**Document scope:** Tested manual setup for one Rubik Pi 3 and one Mac. Replication to 20 boards should use unique USB serial numbers, verify host compatibility (particularly Windows vs macOS), and include an independently tested boot-persistence procedure.
+
+
 > Some network administrators do not allow NTP packets to pass through routers
 
 
