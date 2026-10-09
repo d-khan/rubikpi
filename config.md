@@ -709,3 +709,38 @@ Recommended follow-up: implement a `systemd` oneshot service to load the gadget 
 
 
 
+```txt
+sudo modprobe libcomposite
+sudo modprobe usb_f_ecm
+
+sudo -i
+cd /sys/kernel/config/usb_gadget
+mkdir rubik
+cd rubik
+
+mkdir -p strings/0x409
+
+echo "1234567890" > strings/0x409/serialnumber
+echo "Qualcomm" > strings/0x409/manufacturer
+echo "Rubik Pi USB Ethernet" > strings/0x409/product
+
+mkdir -p configs/c.1
+mkdir -p functions/ecm.usb0
+ln -s functions/ecm.usb0 configs/c.1/
+
+ls -l configs/c.1/
+
+ls /sys/class/udc/
+
+echo a600000.usb > UDC
+
+cat /sys/class/udc/a600000.usb/state
+
+ip addr add 192.168.7.2/24 dev usb0
+ip link set usb0 up
+
+ip -br addr show usb0
+```
+
+
+
