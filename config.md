@@ -710,6 +710,7 @@ Recommended follow-up: implement a `systemd` oneshot service to load the gadget 
 
 
 ```txt
+#!/bin/bash
 sudo modprobe libcomposite
 sudo modprobe usb_f_ecm
 
