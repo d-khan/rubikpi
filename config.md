@@ -443,7 +443,7 @@ Then wait briefly and check again:
 timedatectl
 ```
 
-# Rubik Pi 3 ↔ Mac: USB-C Ethernet Setup
+# Rubik Pi 3 ↔ Mac: USB-C Ethernet Setup (this setup gives intermittent success)
 
 **Platform:** Rubik Pi 3 running Ubuntu 24.04; macOS laptop  
 **Goal:** Direct USB-C Ethernet for SSH terminal access and two-way file transfers, without campus Ethernet or Wi-Fi.  
