@@ -743,5 +743,433 @@ ip link set usb0 up
 ip -br addr show usb0
 ```
 
+# GitHub Setup on Qualcomm RUBIK Pi 3
+
+## 1. Overview
+
+This guide explains how to configure GitHub on the **Qualcomm RUBIK Pi 3 running Ubuntu 24.04**.
+
+It covers:
+
+- Installing and configuring Git.
+- Cloning an existing public GitHub repository.
+- Downloading updates from GitHub.
+- Transferring project files between a computer and the RUBIK Pi.
+- Executing Python and C++ programs on the RUBIK Pi.
+
+**Important:** Before starting, you must configure internet connectivity and create a GitHub repository.
+
+---
+
+## 2. Prerequisites
+
+### 2.1 Configure Internet Access
+
+Before proceeding, you **must complete the "How to Check the Network" guide available in the same GitHub repository**.
+
+This guide explains how to configure and verify network connectivity on the RUBIK Pi.
+
+Ensure that:
+
+1. The RUBIK Pi is connected to a network with internet access.
+2. Network configuration has been completed successfully.
+3. The RUBIK Pi can access external websites.
+
+To verify internet connectivity, run:
+
+```bash
+ping -c 4 google.com
+```
+
+Alternatively, verify HTTPS connectivity:
+
+```bash
+curl -I https://www.google.com
+```
+
+A successful HTTPS response confirms that the RUBIK Pi can communicate with the website.
+
+**Do not proceed until internet connectivity has been established.**
+
+### 2.2 Create a GitHub Repository
+
+A GitHub repository **must be created before proceeding with this guide**.
+
+For this setup, we assume that:
+
+- You have an existing GitHub account.
+- A public GitHub repository has already been created.
+- You know the repository URL.
+- The repository contains the project files you want to access.
+
+If you have not created a repository:
+
+1. Visit https://github.com.
+2. Sign in to your GitHub account.
+3. Select **New Repository**.
+4. Enter a repository name.
+5. Select **Public**.
+6. Optionally initialize the repository with a README file.
+7. Click **Create Repository**.
+
+**Note:** Public repositories can be cloned and downloaded without GitHub authentication. However, uploading changes using `git push` requires authentication and write permission.
+
+---
+
+## 3. Check Git Installation
+
+Open the terminal on the RUBIK Pi.
+
+Check whether Git is installed:
+
+```bash
+git --version
+```
+
+Example output:
+
+```text
+git version 2.43.0
+```
+
+If Git is not installed, run:
+
+```bash
+sudo apt update
+sudo apt install git -y
+```
+
+Verify the installation:
+
+```bash
+git --version
+```
+
+---
+
+## 4. Create a Project Directory
+
+Create a directory to store your GitHub projects:
+
+```bash
+mkdir -p ~/projects
+```
+
+Navigate to the directory:
+
+```bash
+cd ~/projects
+```
+
+Verify the current directory:
+
+```bash
+pwd
+```
+
+Expected output:
+
+```text
+/home/ubuntu/projects
+```
+
+---
+
+## 5. Clone the Public GitHub Repository
+
+Since a public GitHub repository has already been created, you can clone it directly onto the RUBIK Pi.
+
+Use the following command:
+
+```bash
+git clone https://github.com/USERNAME/REPOSITORY.git
+```
+
+Replace:
+
+- `USERNAME` with your GitHub username.
+- `REPOSITORY` with your repository name.
+
+For example:
+
+```bash
+git clone https://github.com/USERNAME/rubik-pi-projects.git
+```
+
+Git downloads the repository and creates a local directory containing its files.
+
+Navigate to the repository:
+
+```bash
+cd rubik-pi-projects
+```
+
+List the files:
+
+```bash
+ls -la
+```
+
+**Note:** Cloning a public repository does not require GitHub authentication.
+
+---
+
+## 6. Download Repository Updates
+
+When files are modified and pushed to GitHub from another computer, the RUBIK Pi can retrieve the latest changes.
+
+Navigate to your repository:
+
+```bash
+cd ~/projects/rubik-pi-projects
+```
+
+Download updates:
+
+```bash
+git pull
+```
+
+Check the repository status:
+
+```bash
+git status
+```
+
+Example output:
+
+```text
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+```
+
+**Important:** If local files have been modified, `git pull` may report conflicts. Commit, stash, or otherwise preserve local changes before pulling.
+
+---
+
+## 7. Execute Programs on the RUBIK Pi
+
+After downloading the project files, programs can be executed directly on the RUBIK Pi.
+
+### 7.1 Python
+
+Check the Python version:
+
+```bash
+python3 --version
+```
+
+Execute a Python program:
+
+```bash
+python3 main.py
+```
+
+### 7.2 C++
+
+Check whether the C++ compiler is installed:
+
+```bash
+g++ --version
+```
+
+If the compiler is missing:
+
+```bash
+sudo apt install g++ -y
+```
+
+Compile a C++ program:
+
+```bash
+g++ main.cpp -o main
+```
+
+Execute the compiled program:
+
+```bash
+./main
+```
+
+---
+
+## 8. Transfer Files from Mac to RUBIK Pi
+
+GitHub can be used as an intermediary to transfer source-code files between your Mac and the RUBIK Pi.
+
+### Step 1: Update Files on the Mac
+
+Navigate to the local Git repository:
+
+```bash
+cd ~/projects/rubik-pi-projects
+```
+
+Stage the modified files:
+
+```bash
+git add .
+```
+
+Commit the changes:
+
+```bash
+git commit -m "Updated project files"
+```
+
+Push the changes to GitHub:
+
+```bash
+git push
+```
+
+**Note:** Pushing changes requires GitHub authentication and write access.
+
+### Step 2: Download Changes on the RUBIK Pi
+
+Navigate to the repository:
+
+```bash
+cd ~/projects/rubik-pi-projects
+```
+
+Download the latest changes:
+
+```bash
+git pull
+```
+
+The updated files are now available on the RUBIK Pi.
+
+---
+
+## 9. Transfer Files from RUBIK Pi to GitHub
+
+GitHub also supports uploading changes made directly on the RUBIK Pi.
+
+However, authentication is required for this operation.
+
+### 9.1 Configure Git Identity
+
+Configure your name:
+
+```bash
+git config --global user.name "Your Name"
+```
+
+Configure your email:
+
+```bash
+git config --global user.email "your-email@example.com"
+```
+
+Verify the configuration:
+
+```bash
+git config --global --list
+```
+
+### 9.2 Commit Changes
+
+Navigate to the repository:
+
+```bash
+cd ~/projects/rubik-pi-projects
+```
+
+Stage changes:
+
+```bash
+git add .
+```
+
+Commit:
+
+```bash
+git commit -m "Updated from RUBIK Pi"
+```
+
+### 9.3 Push Changes
+
+Upload the changes:
+
+```bash
+git push
+```
+
+**Important:** GitHub authentication must be configured before pushing. Supported methods include SSH keys or HTTPS authentication using a personal access token.
+
+For students who only need to download project files, GitHub authentication is unnecessary.
+
+---
+
+## 10. Useful Git Commands
+
+| Command | Description |
+|---|---|
+| `git --version` | Check Git installation |
+| `git clone URL` | Clone a GitHub repository |
+| `git pull` | Download and integrate repository updates |
+| `git status` | Check repository status |
+| `git add .` | Stage modified files |
+| `git commit -m "message"` | Commit changes locally |
+| `git push` | Upload commits to GitHub |
+| `git log --oneline` | View commit history |
+| `git remote -v` | Display remote repository addresses |
+
+---
+
+## 11. Recommended Workflow for Qualcomm Workshops
+
+For the Qualcomm Edge AI workshops at Miramar College, the recommended workflow is:
+
+1. Connect the RUBIK Pi to Miramar College's Wi-Fi network.
+2. Verify internet connectivity using the **"How to Check the Network"** guide.
+3. Ensure that a public GitHub repository has been created.
+4. Access the RUBIK Pi terminal using the Micro-USB serial connection.
+5. Clone the public repository onto the RUBIK Pi.
+6. Develop or modify programs on the student laptop.
+7. Push the updated files to GitHub.
+8. Run `git pull` on the RUBIK Pi to retrieve updates.
+9. Execute the programs directly on the RUBIK Pi.
+
+### Advantages
+
+- No USB-C Ethernet configuration required.
+- No direct SSH connection between the laptop and RUBIK Pi required.
+- Compatible with macOS, Windows, and Linux.
+- No GitHub authentication required for cloning public repositories.
+- Suitable for workshops with multiple RUBIK Pi devices.
+
+### Security Considerations
+
+Public repositories are accessible to everyone.
+
+Do not upload:
+
+- Passwords.
+- API keys or access tokens.
+- Private SSH keys.
+- Personal or confidential information.
+
+---
+
+## 12. Summary
+
+| Component | Configuration |
+|---|---|
+| Hardware | Qualcomm RUBIK Pi 3 |
+| Operating System | Ubuntu 24.04 |
+| Network | Miramar College Wi-Fi |
+| Network Prerequisite | Complete "How to Check the Network" |
+| GitHub Repository | Public repository (must be created beforehand) |
+| Git Client | Git CLI |
+| File Transfer | GitHub using `git clone`, `git pull`, and `git push` |
+| Authentication | Not required for cloning or pulling public repositories |
+| Primary Purpose | Source-code transfer and project management |
+
+**The RUBIK Pi must have working internet connectivity, and a GitHub repository must already exist before beginning the setup.**
 
 
